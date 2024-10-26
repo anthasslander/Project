@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `hms`.`Insurance` (
 -- Table `hms`.`Bill`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `hms`.`Bill` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `amount` DECIMAL NULL,
   `date` DATE NULL,
   `status` VARCHAR(20) NULL,
@@ -67,9 +67,9 @@ CREATE TABLE IF NOT EXISTS `hms`.`Bill` (
   `appointment_id` INT NOT NULL,
   `Insurance_Policy_number` VARCHAR(20) NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_Bill_patient1_idx` (`patient_email` ASC) ,
-  INDEX `fk_Bill_appointment1_idx` (`appointment_id` ASC) ,
-  INDEX `fk_Bill_Insurance1_idx` (`Insurance_Policy_number` ASC) ,
+  INDEX `fk_Bill_patient1_idx` (`patient_email` ASC),
+  INDEX `fk_Bill_appointment1_idx` (`appointment_id` ASC),
+  INDEX `fk_Bill_Insurance1_idx` (`Insurance_Policy_number` ASC),
   CONSTRAINT `fk_Bill_patient1`
     FOREIGN KEY (`patient_email`)
     REFERENCES `hms`.`patient` (`email`)
@@ -79,12 +79,8 @@ CREATE TABLE IF NOT EXISTS `hms`.`Bill` (
     FOREIGN KEY (`appointment_id`)
     REFERENCES `hms`.`appointment` (`id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Bill_Insurance1`
-    FOREIGN KEY (`Insurance_Policy_number`)
-    REFERENCES `hms`.`Insurance` (`Policy_number`)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE);
+    ON UPDATE NO ACTION
+) AUTO_INCREMENT=205;  -- Set the starting point for auto-increment
 
 
 
