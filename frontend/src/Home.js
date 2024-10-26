@@ -102,17 +102,20 @@ const SidebarButtons = () => {
       case "Settings":
         navigate("/Settings");
         break;
-      case "View Lab Test":
+      case "View Lab Test Results":
         navigate("/Viewlabresult");
         break;
-      case "Add Insurance": // Handle Add Insurance navigation
+      case "Add Insurance":
         navigate("/addInsurance");
         break;
-      case "Update Insurance": // Optionally handle other dropdown items
+      case "Update Insurance":
         navigate("/updateInsurance");
         break;
       case "View Insurance":
         navigate("/ViewInsurance");
+        break;
+      case "View Bill": // New case for View Bill button
+        navigate("/ViewBill");
         break;
       default:
         break;
@@ -128,6 +131,7 @@ const SidebarButtons = () => {
             "View Appointments",
             "Schedule Appointment",
             "Settings",
+            "View Bill", // Add View Bill button to the sidebar
           ].map((label) => (
             <SidebarButton
               key={label}

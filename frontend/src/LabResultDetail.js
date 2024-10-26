@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Grommet } from 'grommet';
+import { Box, Text, Grommet, Heading } from 'grommet';
 import { useParams } from 'react-router-dom';
 
 const theme = {
   global: {
     colors: {
-      brand: '#000000',
-      focus: '#000000',
+      brand: '#1a73e8', // Professional blue theme
+      focus: '#00509e',
+      background: '#f8f9fa', // Light gray background
     },
     font: {
       family: 'Lato',
@@ -26,32 +27,25 @@ const LabResultDetail = () => {
         const response = await fetch(`http://localhost:3001/view-lab-result/${testId}`);
         if (response.ok) {
           const resultData = await response.json();
-          console.log('Raw result data from backend:', resultData); // Log the raw data
 
-          // Transform data to match expected structure
           if (resultData && resultData.data && resultData.data.length > 0) {
-            const labResult = resultData.data[0]; // Access the first item in the array
+            const labResult = resultData.data[0];
             const transformedData = {
-              id: labResult.id || 'N/A',            // Adjusted to get id directly from the first object
+              id: labResult.id || 'N/A',
               name: labResult.name || 'N/A',
-              date: labResult.date 
-                  ? new Date(labResult.date).toLocaleDateString() // Format date
-                  : 'N/A',
-              result: labResult.result || 'Not yet available', // Fallback for result
-              appointment_id: labResult.appointment_id || 'N/A'
+              date: labResult.date
+                ? new Date(labResult.date).toLocaleDateString()
+                : 'N/A',
+              result: labResult.result || 'Not yet available',
             };
-            console.log('Transformed lab result data:', transformedData); // Log the transformed data
             setResult(transformedData);
           } else {
-            console.error('Unexpected data format or empty array:', resultData); // Log unexpected format
-            setError('Unexpected data format or no results found.');
+            setError('No lab test results found.');
           }
         } else {
-          console.error('Error fetching lab result:', response.statusText); // Log error message
           setError('Error fetching lab result: ' + response.statusText);
         }
       } catch (err) {
-        console.error('Error fetching data:', err.message); // Log error message
         setError('Error fetching data: ' + err.message);
       } finally {
         setLoading(false);
@@ -63,30 +57,44 @@ const LabResultDetail = () => {
 
   // Helper function to render result details
   const renderDetail = (label, value) => (
-    <Text>
-      <strong>{label}:</strong> {value}
-    </Text>
+    <Box direction="row" gap="small" pad={{ vertical: 'xsmall' }} border={{ color: 'light-4', side: 'bottom' }}>
+      <Text weight="bold" color="dark-2">{label}:</Text>
+      <Text color="dark-3">{value}</Text>
+    </Box>
   );
 
   return (
-    <Grommet theme={theme}>
-      <Box pad="large" align="center" border={{ color: 'light-3', size: 'small' }} round="small">
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : error ? (
-          <Text color="status-critical">{error}</Text>
-        ) : result ? (
-          <>
-            <Text weight="bold" margin={{ bottom: 'medium' }}>Lab Test Result Details:</Text>
-            {renderDetail('ID', result.id)}
-            {renderDetail('Name', result.name)}
-            {renderDetail('Date', result.date)}
-            {renderDetail('Result', result.result)}
-            {renderDetail('Appointment ID', result.appointment_id)}
-          </>
-        ) : (
-          <Text>No results found.</Text>
-        )}
+    <Grommet theme={theme} full>
+      <Box align="center" pad={{ top: 'large', horizontal: 'medium' }} background="background">
+        <Box
+          width="medium"
+          pad="medium"
+          background="white"
+          round="small"
+          elevation="medium"
+          align="center"
+          border={{ color: 'light-3', size: 'small' }}
+          margin={{ top: 'small' }}
+        >
+          {loading ? (
+            <Text color="status-unknown">Loading...</Text>
+          ) : error ? (
+            <Text color="status-critical">{error}</Text>
+          ) : result ? (
+            <>
+              <Heading level={3} margin="none" color="brand">Lab Test Result</Heading>
+              <Text color="dark-3" margin={{ top: 'small', bottom: 'medium' }}>
+                Detailed results of your lab test are shown below.
+              </Text>
+              {renderDetail('Test ID', result.id)}
+              {renderDetail('Test Name', result.name)}
+              {renderDetail('Test Date', result.date)}
+              {renderDetail('Result', result.result)}
+            </>
+          ) : (
+            <Text>No results found.</Text>
+          )}
+        </Box>
       </Box>
     </Grommet>
   );

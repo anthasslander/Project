@@ -16,8 +16,8 @@ app1.use(bodyParser.json()); // Middleware to parse JSON body
 // Connection Info
 var con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "joelbinoy",
+  user: "rick",
+  password: "123456",
   database: "hms",
   multipleStatements: true,
 });
@@ -789,6 +789,129 @@ app.post("/addInsurance1", (req, res) => {
     },
   );
 });
+
+
+// Add Bill Endpoint
+app.post('/addBill', (req, res) => {
+  const { apptId, email } = req.body;
+
+  // Start transaction
+  con.beginTransaction(err => {
+    if (err) {
+      return res.status(500).json({ message: 'Transaction error' });
+    }
+
+    // Query to get appointment date and doctor email using apptId
+    const getAppointmentAndDoctorQuery = `
+      SELECT DATE(appointment.date) AS apptDate, diagnose.doctor AS docEmail
+      FROM appointment
+      JOIN diagnose ON appointment.id = diagnose.appt
+      WHERE appointment.id = ?
+    `;
+
+    con.query(getAppointmentAndDoctorQuery, [apptId], (err, result) => {
+      if (err) {
+        return con.rollback(() => {
+          console.error('Error retrieving appointment and doctor:', err);
+          return res.status(500).json({ message: 'Error retrieving appointment and doctor information' });
+        });
+      }
+
+      if (result.length === 0) {
+        return con.rollback(() => {
+          return res.status(404).json({ message: 'No appointment found for the given ID' });
+        });
+      }
+
+      const { apptDate, docEmail } = result[0];
+
+      // Log the appointment date for debugging
+      console.log('Retrieved appointment date:', apptDate);
+
+      // Query to get the fee per appointment from the doctor table
+      const getDoctorFeeQuery = `SELECT feeperappointment FROM doctor WHERE email = ?`;
+
+      con.query(getDoctorFeeQuery, [docEmail], (err, feeResult) => {
+        if (err) {
+          return con.rollback(() => {
+            console.error('Error retrieving doctor fee:', err);
+            return res.status(500).json({ message: 'Error retrieving doctor fee' });
+          });
+        }
+
+        if (feeResult.length === 0) {
+          return con.rollback(() => {
+            return res.status(404).json({ message: 'No fee found for the doctor' });
+          });
+        }
+
+        const feeAmount = feeResult[0].feeperappointment;
+
+        // Insert the bill into the bill table
+        const addBillQuery = `
+          INSERT INTO bill (amount, date, status, patient_email, appointment_id)
+          VALUES (?, ?, 'not done', ?, ?)
+        `;
+
+        con.query(addBillQuery, [feeAmount, apptDate, email, apptId], (err, insertResult) => {
+          if (err) {
+            return con.rollback(() => {
+              console.error('Error adding bill:', err);
+              return res.status(500).json({ message: 'Error adding bill' });
+            });
+          }
+
+          // Commit transaction
+          con.commit(err => {
+            if (err) {
+              return con.rollback(() => {
+                console.error('Error committing transaction:', err);
+                return res.status(500).json({ message: 'Error committing transaction' });
+              });
+            }
+            return res.status(200).json({ message: 'Bill added successfully', billId: insertResult.insertId });
+          });
+        });
+      });
+    });
+  });
+});
+
+
+// View Bill Endpoint
+// View Bill Endpoint
+app.get('/viewBill', (req, res) => {
+  const { email } = req.query;
+
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  // Query to retrieve all records from the bill table based on patient_email
+  const viewBillQuery = `
+    SELECT id, amount, appointment_id 
+    FROM bill 
+    WHERE patient_email = ?
+  `;
+
+  con.query(viewBillQuery, [email], (err, result) => {
+    if (err) {
+      console.error('Error retrieving bill:', err);
+      return res.status(500).json({ message: 'Error retrieving bill information' });
+    }
+
+    // Log the data retrieved from the database
+    console.log('Retrieved bills for email:', email, result);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'No bills found for the provided email' });
+    }
+
+    return res.status(200).json({ data: result });
+  });
+});
+
 
 app.use(function (req, res, next) {
   next(createError(404));

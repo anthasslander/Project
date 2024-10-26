@@ -26,6 +26,7 @@ import Viewlabresult from "./Viewlabresult";
 import LabResultDetail from "./LabResultDetail";
 import AddInsurance from "./addInsurance";
 import ViewInsurance from "./ViewInsurance";
+import ViewBill from "./ViewBill";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/LabResultDetail/:testId" element={<LabResultDetail />} />
         <Route path="/addInsurance" element={<AddInsurance />} />
         <Route path="/ViewInsurance" element={<ViewInsurance />} />
+        <Route path="/ViewBill" element={<ViewBill />} />
       </Routes>
     </Router>
   );

@@ -69,9 +69,6 @@ const ViewLabResults = () => {
           <Text>Loading...</Text>
         ) : (
           <>
-            <Text>Email: {email}</Text>
-            <Text>Appointment ID: {appointmentId}</Text>
-
             {error && <Text color="status-critical">{error}</Text>}
 
             {labTests.length > 0 ? (

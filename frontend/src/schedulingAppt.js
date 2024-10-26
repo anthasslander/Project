@@ -276,7 +276,7 @@ const SchedulingAppt = () => {
                   fetch(`http://localhost:3001/addToPatientSeeAppt?email=${currentUserEmail}&id=${gen_uid}&concerns=${concerns}&symptoms=${symptoms}`)
                     .then(() => {
                       window.alert("Appointment successfully scheduled!");
-                      setShowViewBill(true); // Show the "View Bill" button
+                    
                     });
                 });
             });
@@ -310,16 +310,7 @@ const SchedulingAppt = () => {
               type="submit"
               primary
             />
-            {showViewBill && (
-              <Button
-                label="View Bill"
-                onClick={() => {
-                  // Logic to view the bill
-                  window.alert("View Bill clicked!");
-                }}
-                color="#00739D"
-              />
-            )}
+            
           </Box>
         </Form>
       </Box>
