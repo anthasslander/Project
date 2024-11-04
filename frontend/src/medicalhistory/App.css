@@ -1,0 +1,54 @@
+/* App.css */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+.container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('bimg.jpeg'); /* Correct path to image in public directory */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+/* Add padding to table cells for spacing */
+.cell-padding {
+  padding: 10px; /* Add padding for table cells */
+}
+
+/* Optional: Add spacing between rows for better visual separation */
+.grommetux-table {
+  margin: 20px 0; /* Space above and below each table */
+}
+
+/* Style for strong text for better visibility */
+strong {
+  color: #000;
+}
+
+/* Spacing for the container of medical history and diagnoses */
+.medical-history-container {
+  margin-bottom: 60px; /* Adequate spacing below each entry */
+}
+
+/* General Box styling for consistent appearance */
+.box-spacing {
+  margin: 20px 0; /* Consistent spacing */
+}

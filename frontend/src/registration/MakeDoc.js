@@ -82,10 +82,11 @@ const MakeDoc = () => {
         });
 
         if (createResponse.ok) {
+          window.alert("Doctor account created successfully!");
           navigate('/DocHome');
         } else {
           const error = await createResponse.json();
-          window.alert(`Error: ${error.message}`);
+          window.alert(`Error: ${error.error}`);
         }
       }
     } catch (error) {

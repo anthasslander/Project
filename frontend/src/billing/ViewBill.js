@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Grommet, Heading, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet';
+import { Box, Text, Grommet } from 'grommet';
 
 const theme = {
   global: {
@@ -9,12 +9,13 @@ const theme = {
     },
     font: {
       family: 'Lato',
+      size: '18px', // Increased default font size
     },
   },
 };
 
 const ViewBill = () => {
-  const [billData, setBillData] = useState(null);
+  const [billData, setBillData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -60,51 +61,41 @@ const ViewBill = () => {
 
   return (
     <Grommet theme={theme} full>
-      <Box pad="large" fill>
-        <Box width="xlarge" margin={{ top: 'medium' }}>
-          <Heading level={2} margin={{ bottom: 'medium' }}>Billing Information</Heading>
+      <Box fill align="center" justify="start" pad="large">
+        <Box width="xlarge" align="center">
+          <Text size="large" margin={{ bottom: 'medium', vertical: 'small' }} textAlign="center">
+            Billing Information
+          </Text>
           
           {loading ? (
-            <Text>Loading...</Text>
+            <Text size="large">Loading...</Text>
           ) : error ? (
-            <Text color="status-critical">{error}</Text>
+            <Text size="large" color="status-critical">{error}</Text>
           ) : (
-            <>
+            <div style={{ overflowX: 'auto' }}>
               {billData && billData.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableCell scope="col" border="bottom">
-                        <Text weight="bold">Bill ID</Text>
-                      </TableCell>
-                      <TableCell scope="col" border="bottom">
-                        <Text weight="bold">Appointment ID</Text>
-                      </TableCell>
-                      <TableCell scope="col" border="bottom">
-                        <Text weight="bold">Amount (₹)</Text>
-                      </TableCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Bill ID</th>
+                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Appointment ID</th>
+                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {billData.map((bill, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Text>{bill.id}</Text>
-                        </TableCell>
-                        <TableCell>
-                          <Text>{bill.appointment_id}</Text>
-                        </TableCell>
-                        <TableCell>
-                          <Text>₹{bill.amount}</Text>
-                        </TableCell>
-                      </TableRow>
+                      <tr key={index}>
+                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.id}</td>
+                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.appointment_id}</td>
+                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>₹{bill.amount}</td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               ) : (
-                <Text>No billing information available.</Text>
+                <Text size="large">No billing information available.</Text>
               )}
-            </>
+            </div>
           )}
         </Box>
       </Box>

@@ -15,7 +15,7 @@ const theme = {
   global: {
     colors: {
       brand: '#000000',
-      focus: '#000000'
+      focus: '#000000',
     },
     font: {
       family: 'Lato',
@@ -32,7 +32,8 @@ const AppBar = (props) => (
     background='brand'
     pad={{ left: 'medium', right: 'small', vertical: 'small' }}
     style={{ zIndex: '1' }}
-    {...props} />
+    {...props}
+  />
 );
 
 const CreateAccount = () => {
@@ -49,21 +50,17 @@ const CreateAccount = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-
-    console.log("Submit", formValues);
+    event.preventDefault(); // Prevent default form submission behavior
 
     try {
-      // Check if patient exists
+      // Check if patient already exists
       const response = await fetch(`http://localhost:3001/checkIfPatientExists?email=${formValues.email}`);
       const result = await response.json();
-      console.log(result.data[0]);
 
-      if (result.data[0]) {
+      if (result.data.length > 0) {
         window.alert("An account is already associated with that email.");
-        console.log("User found");
       } else {
-        // Create new account
+        // Create a new account
         const createResponse = await fetch(`http://localhost:3001/makeAccount`, {
           method: 'POST',
           headers: {
@@ -78,15 +75,16 @@ const CreateAccount = () => {
             gender: formValues.gender,
             conditions: formValues.conditions,
             medications: formValues.medications,
-            surgeries: formValues.surgeries
-          })
+            surgeries: formValues.surgeries,
+          }),
         });
 
         if (!createResponse.ok) {
-          const errorMessage = await createResponse.text(); // or createResponse.json() if the server returns JSON error
+          const errorMessage = await createResponse.text();
           throw new Error(`Server responded with status ${createResponse.status}: ${errorMessage}`);
         }
 
+        window.alert("Account created successfully!");
         navigate("/Home");
       }
     } catch (error) {
@@ -105,10 +103,7 @@ const CreateAccount = () => {
       <Box fill align="center" justify="top">
         <Box width="medium">
           <Text color="#AAAAAA">Patient's registration form:</Text>
-          <Form
-            onReset={event => console.log(event)}
-            onSubmit={handleSubmit}
-          >
+          <Form onSubmit={handleSubmit}>
             <FormField
               label="First Name"
               name="firstName"
@@ -184,7 +179,6 @@ const CreateAccount = () => {
             />
             <Box direction="row" align="center" gap="small">
               <Button
-                style={{ textAlign: 'center' }}
                 label="Cancel"
                 fill="horizontal"
                 href="/" 

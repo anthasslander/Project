@@ -74,15 +74,15 @@ const SidebarButtons = () => {
             case "Appointments":
                 window.location = "/ApptList";
                 break;
-            case "Sign Out":
-                fetch("http://localhost:3001/endSession")
-                    .then(() => window.location = "/");
-                break;
             case "Settings":
                 window.location = "/DocSettings";
                 break;
             case "View Patients":
                 window.location = "/MedHistView";
+                break;
+            case "Sign Out":
+                fetch("http://localhost:3001/endSession")
+                    .then(() => window.location = "/");
                 break;
             default:
                 break;
@@ -93,7 +93,7 @@ const SidebarButtons = () => {
         <Grommet full theme={theme}>
             <Box fill direction="row">
                 <Box background="brand">
-                    {["Appointments", "View Patients", "Settings", "Sign Out"].map(label => (
+                    {["Appointments", "View Patients", "Settings"].map(label => (
                         <SidebarButton
                             key={label}
                             label={label}
@@ -102,6 +102,11 @@ const SidebarButtons = () => {
                         />
                     ))}
                     <LabTestButton onGenerate={() => window.location = "/Generatetestresult1"} />
+                    <SidebarButton
+                        label="Sign Out"
+                        active={"Sign Out" === active}
+                        onClick={() => handleSidebarClick("Sign Out")}
+                    />
                 </Box>
             </Box>
         </Grommet>
@@ -143,9 +148,9 @@ const DocHome = () => {
                     <Box
                         gridArea="sidebar"
                         width="small"
-                        animation={[
-                            { type: 'fadeIn', duration: 300 },
-                            { type: 'slideRight', size: 'xlarge', duration: 150 },
+                        animation={[ 
+                            { type: 'fadeIn', duration: 300 }, 
+                            { type: 'slideRight', size: 'xlarge', duration: 150 }, 
                         ]}
                     >
                         <SidebarButtons />

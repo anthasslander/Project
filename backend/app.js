@@ -48,87 +48,74 @@ app.use(cors());
 
 // Checks if patient exists in database
 app.get("/checkIfPatientExists", (req, res) => {
-  let params = req.query;
-  let email = params.email;
-  let statement = `SELECT * FROM Patient WHERE email = ?`;
-  console.log(statement);
-  con.query(statement, [email], function (error, results, fields) {
-    if (error) throw error;
-    else {
-      return res.json({
-        data: results,
-      });
+  const email = req.query.email;
+  const statement = `SELECT * FROM Patient WHERE email = ?`;
+
+  console.log(`Executing query: ${statement} with parameters: ${email}`);
+
+  con.query(statement, [email], function (error, results) {
+    if (error) {
+      console.error("Error checking patient existence:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
+    return res.json({ data: results });
   });
 });
 
-// Creates User Account
-app.get("/makeAccount", (req, res) => {
-  let query = req.query;
-  let name = query.name + " " + query.lastname;
-  let email = query.email;
-  let password = query.password;
-  let address = query.address;
-  let gender = query.gender;
-  let medications = query.medications || "none";
-  let conditions = query.conditions || "none";
-  let surgeries = query.surgeries || "none";
+app.post("/makeAccount", (req, res) => {
+  const { name, lastname, email, password, address, gender, conditions, medications, surgeries } = req.body;
+  const fullName = `${name} ${lastname}`;
+  const sql_statement = `INSERT INTO Patient (email, password, name, address, gender) VALUES (?, ?, ?, ?, ?)`;
 
-  let sql_statement = `INSERT INTO Patient (email, password, name, address, gender) VALUES (?, ?, ?, ?, ?)`;
-  console.log(sql_statement);
-  con.query(
-    sql_statement,
-    [email, password, name, address, gender],
-    function (error, results, fields) {
-      if (error) throw error;
-      else {
-        email_in_use = email;
-        password_in_use = password;
-        who = "pat";
-        res.json({ data: results });
-      }
-    },
-  );
+  console.log(`Executing query: ${sql_statement} with parameters: ${email}, ${password}, ${fullName}, ${address}, ${gender}`);
 
-  sql_statement = "SELECT id FROM MedicalHistory ORDER BY id DESC LIMIT 1;";
-  console.log(sql_statement);
-  con.query(sql_statement, function (error, results, fields) {
-    if (error) throw error;
-    else {
-      let generated_id = results[0].id + 1;
-      sql_statement = `INSERT INTO MedicalHistory (id, date, conditions, surgeries, medication) VALUES (?, curdate(), ?, ?, ?)`;
-      console.log(sql_statement);
-      con.query(
-        sql_statement,
-        [generated_id, conditions, surgeries, medications],
-        function (error, results, fields) {
-          if (error) throw error;
-          else {
-            sql_statement = `INSERT INTO PatientsFillHistory (patient, history) VALUES (?, ?)`;
-            console.log(sql_statement);
-            con.query(
-              sql_statement,
-              [email, generated_id],
-              function (error, results, fields) {
-                if (error) throw error;
-              },
-            );
-          }
-        },
-      );
+  con.query(sql_statement, [email, password, fullName, address, gender], function (error, results) {
+    if (error) {
+      console.error("Error creating patient account:", error);
+      return res.status(500).json({ error: "Error creating the account" });
     }
+
+    const generatedIdQuery = "SELECT id FROM MedicalHistory ORDER BY id DESC LIMIT 1;";
+    con.query(generatedIdQuery, function (error, results) {
+      if (error) {
+        console.error("Error fetching last medical history id:", error);
+        return res.status(500).json({ error: "Error fetching medical history" });
+      }
+
+      const generated_id = results[0].id + 1;
+      const medicalHistoryStatement = `INSERT INTO MedicalHistory (id, date, conditions, surgeries, medication) VALUES (?, curdate(), ?, ?, ?)`;
+
+      con.query(medicalHistoryStatement, [generated_id, conditions || "none", surgeries || "none", medications || "none"], function (error) {
+        if (error) {
+          console.error("Error inserting into MedicalHistory:", error);
+          return res.status(500).json({ error: "Error updating medical history" });
+        }
+
+        const linkHistoryStatement = `INSERT INTO PatientsFillHistory (patient, history) VALUES (?, ?)`;
+        con.query(linkHistoryStatement, [email, generated_id], function (error) {
+          if (error) {
+            console.error("Error linking patient to history:", error);
+            return res.status(500).json({ error: "Error linking patient to medical history" });
+          }
+          return res.status(201).json({ message: "Patient account successfully created" });
+        });
+      });
+    });
   });
 });
 
 // Checks If Doctor Exists
+// Check if Doctor exists
 app.get("/checkIfDocExists", (req, res) => {
   let params = req.query;
   let email = params.email;
   let statement = `SELECT * FROM Doctor WHERE email = ?`;
   console.log(statement);
   con.query(statement, [email], function (error, results, fields) {
-    if (error) throw error;
-    else {
+    if (error) {
+      console.error("Error checking doctor existence:", error);
+      return res.status(500).json({ error: "Database query failed" });
+    } else {
       return res.json({
         data: results,
       });
@@ -136,35 +123,36 @@ app.get("/checkIfDocExists", (req, res) => {
   });
 });
 
-// Makes Doctor Account
-app.get("/makeDocAccount", (req, res) => {
-  let params = req.query;
+// Create Doctor Account
+app.post("/makeDocAccount", (req, res) => {
+  let params = req.body;
   let name = params.name + " " + params.lastname;
   let email = params.email;
   let password = params.password;
   let gender = params.gender;
   let schedule = params.schedule;
-  let sql_statement = `INSERT INTO Doctor (email, gender, password, name) VALUES (?, ?, ?, ?)`;
+  let feePerAppointment = 1000; // Default value for fee per appointment
+
+  let sql_statement = `INSERT INTO Doctor (email, gender, password, name, feeperappointment) VALUES (?, ?, ?, ?, ?)`;
   console.log(sql_statement);
-  con.query(
-    sql_statement,
-    [email, gender, password, name],
-    function (error, results, fields) {
-      if (error) throw error;
-      else {
-        sql_statement = `INSERT INTO DocsHaveSchedules (sched, doctor) VALUES (?, ?)`;
-        console.log(sql_statement);
-        con.query(sql_statement, [schedule, email], function (error) {
-          if (error) throw error;
-        });
-        email_in_use = email;
-        password_in_use = password;
-        who = "doc";
+  con.query(sql_statement, [email, gender, password, name, feePerAppointment], function (error, results, fields) {
+    if (error) {
+      console.error("Error creating doctor account:", error);
+      return res.status(500).json({ error: "Failed to create doctor account", details: error.message });
+    } else {
+      sql_statement = `INSERT INTO DocsHaveSchedules (sched, doctor) VALUES (?, ?)`;
+      console.log(sql_statement);
+      con.query(sql_statement, [schedule, email], function (error) {
+        if (error) {
+          console.error("Error linking schedule:", error);
+          return res.status(500).json({ error: "Failed to link schedule", details: error.message });
+        }
         return res.json({ data: results });
-      }
-    },
-  );
+      });
+    }
+  });
 });
+
 
 // Check if user is logged in (for patients)
 app.post("/checklogin", (req, res) => {

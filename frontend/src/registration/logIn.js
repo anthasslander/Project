@@ -42,7 +42,7 @@ const LogIn = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
     const formData = new FormData(event.target);
     const email = formData.get("email");
     const password = formData.get("password");
@@ -54,28 +54,24 @@ const LogIn = () => {
         : `http://localhost:3001/checklogin`;
 
       const response = await fetch(endpoint, {
-        method: 'POST', // Set the request method to POST
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Specify content type as JSON
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }), // Send email and password in the body
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.data) {
-        window.alert("Invalid Log In"); // Show alert if login fails
+        window.alert("Invalid Log In");
       } else {
-        // Store user data in local storage
         localStorage.setItem('user', JSON.stringify({ email, who: isDoc ? 'doc' : 'pat' }));
-
-        // Navigate based on user type
-        navigate(isDoc ? "/DocHome" : "/Home"); // Navigate based on user type
-        console.log(data.data); // Optionally log user data
+        navigate(isDoc ? "/DocHome" : "/Home");
       }
     } catch (error) {
       console.error("Error logging in:", error);
-      window.alert("An error occurred while logging in."); // Alert on error
+      window.alert("An error occurred while logging in.");
     }
   };
 
@@ -115,19 +111,25 @@ const LogIn = () => {
               name="isDoc"
               onChange={(event) => setIsDoctor(event.target.checked)}
             />
-            <Box direction="column" align="center">
+            <Box direction="column" align="center" margin={{ top: 'medium' }}>
               <Button
                 type="submit"
                 label="Log In"
                 fill="horizontal"
                 primary
-                style={{ margin: "1rem" }}
+                style={{ margin: "1rem 0" }}
               />
               <Button
                 label="Create Account"
                 fill="horizontal"
                 href="/createAcc"
-                style={{ margin: "0.5rem" }}
+                style={{
+                  margin: "0.5rem 0",
+                  textAlign: 'center', // Center text alignment
+                  display: 'flex', // Use flexbox for centering
+                  justifyContent: 'center', // Center horizontally
+                  alignItems: 'center', // Center vertically
+                }}
               />
             </Box>
           </Form>
