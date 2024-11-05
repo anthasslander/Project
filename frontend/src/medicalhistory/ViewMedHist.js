@@ -6,11 +6,6 @@ import {
   Grommet,
   FormField,
   Form,
-  Table,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableBody,
 } from "grommet";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
@@ -30,12 +25,13 @@ const theme = {
 const ViewMedHist = () => {
   const [medHistState, setMedHistState] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  const [isSearched, setIsSearched] = useState(false); // New state to track search status
   const navigate = useNavigate();
 
   const fetchMedHist = async (value) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/MedHistView?name=${value}`,
+        `http://localhost:3001/MedHistView?name=${value}`
       );
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
@@ -47,12 +43,13 @@ const ViewMedHist = () => {
   };
 
   useEffect(() => {
-    fetchMedHist("");
+    fetchMedHist(""); // Optionally fetch initial data
   }, []);
 
   const handleSearch = (event) => {
     event.preventDefault();
     fetchMedHist(searchValue);
+    setIsSearched(true); // Mark that a search has been performed
   };
 
   const Header = () => (
@@ -74,37 +71,9 @@ const ViewMedHist = () => {
     </Box>
   );
 
-  const Body = () => (
-    <Box width="100vw">
-      <Box className="panel panel-default p50 uth-panel">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell scope="col" border="bottom">
-                Name
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                Profile
-              </TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {medHistState.map((patient) => (
-              <TableRow key={patient.id}>
-                <TableCell>{patient.name}</TableCell>
-                <TableCell>
-                  <Button
-                    label="Medical Profile"
-                    onClick={() => navigate(`/ViewOneHistory/${patient.email}`)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>
-    </Box>
-  );
+  const handleProfileView = (email) => {
+    navigate(`/ViewOneHistory/${email}`);
+  };
 
   return (
     <Grommet full theme={theme}>
@@ -124,7 +93,28 @@ const ViewMedHist = () => {
             <Button type="submit" primary label="Submit" />
           </Box>
         </Form>
-        <Body />
+
+        {/* Only show the button if there's a patient in medHistState after search */}
+        {isSearched && medHistState.length === 1 && (
+          <Box margin={{ top: "small" }} align="center">
+            <Heading level="5">{medHistState[0].name}</Heading>
+            <Button
+              label="View Medical Profile"
+              onClick={() => handleProfileView(medHistState[0].email)}
+              primary
+              fill="horizontal"
+              style={{
+                margin: "0.25rem 0",
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "white", // Change button background to white
+                color: "black", // Set text color to black for contrast
+              }}
+            />
+          </Box>
+        )}
       </Box>
     </Grommet>
   );
