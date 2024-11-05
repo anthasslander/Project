@@ -108,9 +108,6 @@ const SidebarButtons = () => {
       case "Add Insurance":
         navigate("/addInsurance");
         break;
-      case "Update Insurance":
-        navigate("/updateInsurance");
-        break;
       case "View Insurance":
         navigate("/ViewInsurance");
         break;
@@ -144,7 +141,6 @@ const SidebarButtons = () => {
             label="Insurance"
             dropdownItems={[
               "Add Insurance",
-              "Update Insurance",
               "View Insurance",
             ]}
             onClick={handleClick} // Pass handleClick to manage dropdown selection
