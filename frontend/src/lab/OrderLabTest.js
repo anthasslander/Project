@@ -22,15 +22,14 @@ const theme = {
 };
 
 const OrderLabTest = () => {
-  const { appointmentId } = useParams(); // Gets the appointmentId from the route
-  const navigate = useNavigate(); // Initialize the navigate function
+  const { appointmentId } = useParams();
+  const navigate = useNavigate();
   const [testName, setTestName] = useState('');
   const [date, setDate] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Check if fields are filled before submission
     if (!testName || !date) {
       window.alert('Please fill in all fields.');
       return;
@@ -42,12 +41,11 @@ const OrderLabTest = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: testName, date, appointment_id: appointmentId }), // Ensure correct field names
+        body: JSON.stringify({ name: testName, date, appointment_id: appointmentId }),
       });
 
       if (response.ok) {
         window.alert('Lab test ordered successfully!');
-        // Navigate to the order-lab-test route with appointmentId
         navigate(`/order-lab-test/${appointmentId}`);
       } else {
         console.error('Error ordering lab test:', response.statusText);
@@ -59,6 +57,26 @@ const OrderLabTest = () => {
 
   return (
     <Grommet theme={theme} full>
+      {/* Header */}
+      <Box
+        tag="header"
+        background="brand"
+        pad="small"
+        elevation="small"
+        justify="between"
+        direction="row"
+        align="center"
+        flex={false}
+        style={{ borderBottom: '1px solid grey' }}
+      >
+        <a style={{ color: 'inherit', textDecoration: 'inherit' }} href=" ">
+          <Heading level="3" margin="none">
+            HMS
+          </Heading>
+        </a>
+      </Box>
+
+      {/* Main Content */}
       <Box align="center" pad="medium">
         <Heading level="3">Order Lab Test</Heading>
         <Form onSubmit={handleSubmit}>

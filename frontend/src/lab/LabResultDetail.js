@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Grommet } from 'grommet';
+import { Box, Text, Grommet, Heading } from 'grommet';
 import { useParams } from 'react-router-dom';
 
 const theme = {
   global: {
     colors: {
-      brand: '#1a73e8',
-      focus: '#1a73e8',
-      background: '#f8f9fa', // Light gray background
+      brand: '#000000', // Updated color to match ViewBill's theme
+      focus: '#000000',
+      background: '#f8f9fa',
     },
     font: {
       family: 'Lato',
@@ -28,15 +28,12 @@ const LabResultDetail = () => {
         const response = await fetch(`http://localhost:3001/view-lab-result/${testId}`);
         if (response.ok) {
           const resultData = await response.json();
-
           if (resultData && resultData.data && resultData.data.length > 0) {
             const labResult = resultData.data[0];
             const transformedData = {
               id: labResult.id || 'N/A',
               name: labResult.name || 'N/A',
-              date: labResult.date
-                ? new Date(labResult.date).toLocaleDateString()
-                : 'N/A',
+              date: labResult.date ? new Date(labResult.date).toLocaleDateString() : 'N/A',
               result: labResult.result || 'Not yet available',
             };
             setResult(transformedData);
@@ -58,6 +55,23 @@ const LabResultDetail = () => {
 
   return (
     <Grommet theme={theme} full>
+      <Box
+        tag="header"
+        background="brand"
+        pad="small"
+        elevation="small"
+        justify="between"
+        direction="row"
+        align="center"
+        flex={false}
+        style={{ borderBottom: '1px solid grey' }}
+      >
+        <a style={{ color: 'inherit', textDecoration: 'inherit' }} href=" ">
+          <Heading level="3" margin="none">
+            HMS
+          </Heading>
+        </a>
+      </Box>
       <Box fill align="center" justify="start" pad="large">
         <Box width="xlarge" align="center">
           <Text size="large" margin={{ bottom: 'medium', vertical: 'small' }} textAlign="center">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Text, Grommet } from 'grommet';
+import { Box, Button, Text, Grommet, Heading } from 'grommet';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const theme = {
@@ -20,16 +20,16 @@ const ViewLabResults = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      setEmail(user.email); // Set email in state
+      setEmail(user.email);
     } else {
       console.error('User is not logged in');
-      navigate('/login'); // Redirect to login if user is not logged in
+      navigate('/login');
     }
   }, [navigate]);
 
@@ -41,29 +41,49 @@ const ViewLabResults = () => {
           const response = await fetch(`http://localhost:3001/view-lab-results?email=${email}`);
           if (response.ok) {
             const resultData = await response.json();
-            setLabTests(resultData.data); // Ensure to access the correct structure
+            setLabTests(resultData.data);
           } else {
             setError('Error fetching lab tests: ' + response.statusText);
           }
         } catch (err) {
           setError('Error fetching data: ' + err.message);
         } finally {
-          setLoading(false); // Stop loading after data fetch attempt
+          setLoading(false);
         }
       } else {
-        setLoading(false); // No email available, stop loading
+        setLoading(false);
       }
     };
 
-    fetchLabTests(); // Fetch lab tests if email is set
-  }, [email]); // Only run when email changes
+    fetchLabTests();
+  }, [email]);
 
   const handleViewResult = (testId) => {
-    navigate(`/LabResultDetail/${testId}`); // Navigate to the LabResultDetail page
+    navigate(`/LabResultDetail/${testId}`);
   };
 
   return (
     <Grommet full theme={theme}>
+      {/* Header */}
+      <Box
+        tag="header"
+        background="brand"
+        pad="small"
+        elevation="small"
+        justify="between"
+        direction="row"
+        align="center"
+        flex={false}
+        style={{ borderBottom: '1px solid grey' }}
+      >
+        <a style={{ color: 'inherit', textDecoration: 'inherit' }} href=" ">
+          <Heading level="3" margin="none">
+            HMS
+          </Heading>
+        </a>
+      </Box>
+
+      {/* Main Content */}
       <Box pad="large" align="center">
         {loading ? (
           <Text>Loading...</Text>
@@ -91,7 +111,7 @@ const ViewLabResults = () => {
                     </Box>
                     <Button
                       label="View Result"
-                      onClick={() => handleViewResult(test.id)} // Use the updated function
+                      onClick={() => handleViewResult(test.id)}
                       primary
                     />
                   </Box>

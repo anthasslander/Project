@@ -6,7 +6,7 @@ const theme = {
   global: {
     colors: {
       brand: '#000000',
-      focus: '#000000'
+      focus: '#000000',
     },
     font: {
       family: 'Lato',
@@ -28,7 +28,7 @@ const Generatetestresult1 = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id: testId,  // Send 'id' instead of 'test_id'
+        id: testId, // Send 'id' instead of 'test_id'
         result: result,
       }),
     });
@@ -44,6 +44,26 @@ const Generatetestresult1 = () => {
 
   return (
     <Grommet full theme={theme}>
+      {/* Header */}
+      <Box
+        tag="header"
+        background="brand"
+        pad="small"
+        elevation="small"
+        justify="between"
+        direction="row"
+        align="center"
+        flex={false}
+        style={{ borderBottom: '1px solid grey' }}
+      >
+        <a style={{ color: 'inherit', textDecoration: 'inherit' }} href=" ">
+          <Heading level="3" margin="none">
+            HMS
+          </Heading>
+        </a>
+      </Box>
+
+      {/* Main Content */}
       <Box pad="large" align="center">
         <Heading level="2">Generate Lab Result</Heading>
         <Box
@@ -67,6 +87,7 @@ const Generatetestresult1 = () => {
                 resize="vertical"
               />
             </Box>
+            {/* Submit Button aligned left */}
             <Button type="submit" primary label="Submit" />
           </form>
         </Box>

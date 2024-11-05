@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Grommet } from 'grommet';
+import { Box, Text, Grommet, Heading } from 'grommet';
 
 const theme = {
   global: {
     colors: {
-      brand: '#1a73e8',
-      focus: '#1a73e8',
+      brand: '#000000', // Updated to match the Home component
+      focus: '#000000', // Updated to match the Home component
     },
     font: {
       family: 'Lato',
@@ -13,6 +13,26 @@ const theme = {
     },
   },
 };
+
+const Header = () => (
+  <Box
+    tag="header"
+    background="brand"
+    pad="small"
+    elevation="small"
+    justify="between"
+    direction="row"
+    align="center"
+    flex={false}
+    style={{ borderBottom: '1px solid grey' }}
+  >
+    <a style={{ color: 'inherit', textDecoration: 'inherit' }} href=" ">
+      <Heading level="3" margin="none">
+        HMS
+      </Heading>
+    </a>
+  </Box>
+);
 
 const ViewBill = () => {
   const [billData, setBillData] = useState([]);
@@ -61,42 +81,45 @@ const ViewBill = () => {
 
   return (
     <Grommet theme={theme} full>
-      <Box fill align="center" justify="start" pad="large">
-        <Box width="xlarge" align="center">
-          <Text size="large" margin={{ bottom: 'medium', vertical: 'small' }} textAlign="center">
-            Billing Information
-          </Text>
-          
-          {loading ? (
-            <Text size="large">Loading...</Text>
-          ) : error ? (
-            <Text size="large" color="status-critical">{error}</Text>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              {billData && billData.length > 0 ? (
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Bill ID</th>
-                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Appointment ID</th>
-                      <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Amount (₹)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {billData.map((bill, index) => (
-                      <tr key={index}>
-                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.id}</td>
-                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.appointment_id}</td>
-                        <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>₹{bill.amount}</td>
+      <Box fill>
+        <Header />
+        <Box fill align="center" justify="start" pad={{ top: 'large' }}>
+          <Box width="xlarge" align="center">
+            <Text size="large" margin={{ bottom: 'medium', vertical: 'small' }} textAlign="center">
+              Billing Information
+            </Text>
+
+            {loading ? (
+              <Text size="large">Loading...</Text>
+            ) : error ? (
+              <Text size="large" color="status-critical">{error}</Text>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                {billData && billData.length > 0 ? (
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Bill ID</th>
+                        <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Appointment ID</th>
+                        <th style={{ border: '2px solid #ccc', padding: '12px', textAlign: 'left', backgroundColor: '#f2f2f2', fontSize: '18px' }}>Amount (₹)</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <Text size="large">No billing information available.</Text>
-              )}
-            </div>
-          )}
+                    </thead>
+                    <tbody>
+                      {billData.map((bill, index) => (
+                        <tr key={index}>
+                          <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.id}</td>
+                          <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>{bill.appointment_id}</td>
+                          <td style={{ border: '2px solid #ccc', padding: '12px', fontSize: '18px' }}>₹{bill.amount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <Text size="large">No billing information available.</Text>
+                )}
+              </div>
+            )}
+          </Box>
         </Box>
       </Box>
     </Grommet>
