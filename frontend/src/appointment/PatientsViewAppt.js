@@ -86,53 +86,45 @@ const PatientsViewAppointments = () => {
           align="center"
           justify="start"
         >
-          <table className="table table-hover" style={{ width: "100%" }}>
+          <table className="table table-hover" style={{ width: "100%", textAlign: "center", borderCollapse: "separate", borderSpacing: "0 10px" }}>
             <thead>
               <tr>
-                <th>Date of Appointment</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Concerns</th>
-                <th>Symptoms</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th style={{ padding: "10px" }}>Date of Appointment</th>
+                <th style={{ padding: "10px" }}>Start Time</th>
+                <th style={{ padding: "10px" }}>End Time</th>
+                <th style={{ padding: "10px" }}>Concerns</th>
+                <th style={{ padding: "10px" }}>Symptoms</th>
+                <th style={{ padding: "10px" }}>Status</th>
+                <th style={{ padding: "10px", textAlign: "left", paddingLeft: "40px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {appointmentsState.map((patient) => (
-                <tr key={patient.ID}>
-                  <td align="center">
-                    {new Date(patient.theDate)
-                      .toLocaleDateString()
-                      .substring(0, 10)}
-                  </td>
-                  <td align="center">{patient.theStart.substring(0, 5)}</td>
-                  <td align="center">{patient.theEnd.substring(0, 5)}</td>
-                  <td align="center">{patient.theConcerns}</td>
-                  <td align="center">{patient.theSymptoms}</td>
-                  <td align="center">{patient.status}</td>
-                  <td>
-                    <Box
-                      direction="row"
-                      gap="small"
-                      align="center"
-                      justify="center"
-                    >
+                <tr key={patient.ID} style={{ backgroundColor: "#f9f9f9", padding: "10px" }}>
+                  <td style={{ padding: "10px" }}>{new Date(patient.theDate).toLocaleDateString().substring(0, 10)}</td>
+                  <td style={{ padding: "10px" }}>{patient.theStart.substring(0, 5)}</td>
+                  <td style={{ padding: "10px" }}>{patient.theEnd.substring(0, 5)}</td>
+                  <td style={{ padding: "10px" }}>{patient.theConcerns}</td>
+                  <td style={{ padding: "10px" }}>{patient.theSymptoms}</td>
+                  <td style={{ padding: "10px" }}>{patient.status}</td>
+                  <td style={{ padding: "10px", textAlign: "left", paddingLeft: "40px" }}>
+                    <Box direction="row" gap="small" justify="start">
                       <Button
                         label="See Diagnosis"
                         href={`/showDiagnoses/${patient.ID}`}
+                        margin="xsmall"
                       />
                       {patient.status === "NotDone" ? (
                         <Button
                           label="Cancel"
                           onClick={() => handleCancelOrDelete(patient.ID, true)}
+                          margin="xsmall"
                         />
                       ) : (
                         <Button
                           label="Delete"
-                          onClick={() =>
-                            handleCancelOrDelete(patient.ID, false)
-                          }
+                          onClick={() => handleCancelOrDelete(patient.ID, false)}
+                          margin="xsmall"
                         />
                       )}
                     </Box>

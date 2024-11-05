@@ -50,7 +50,7 @@ export default function App() {
         <Route
           path="/"
           element={
-            user ? (user.who === "pat" ? <Home /> : <DocHome />) : <LogIn />
+            user ? (user.who === "pat" ? <Home setUser={setUser} /> : <DocHome setUser={setUser} />) : <LogIn />
           }
         />
         <Route path="/NoMedHistFound" element={<NoMedHistFound />} />
@@ -64,7 +64,7 @@ export default function App() {
         <Route path="/PatientsViewAppt" element={<PatientsViewAppt />} />
         <Route path="/DocSettings" element={<DocSettings />} />
         <Route path="/ApptList" element={<DocViewAppt />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" />} /> 
         <Route path="/order-lab-test/:appointmentId" element={<OrderLabTest />} />
         <Route path="/Generatetestresult1" element={<Generatetestresult1 />} />
         <Route path="/Viewlabresult" element={<Viewlabresult />} />

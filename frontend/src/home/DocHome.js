@@ -7,7 +7,7 @@ import {
     Grid,
     Text,
 } from 'grommet';
-
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 import './App.css';
 
 const theme = {
@@ -50,7 +50,7 @@ const LabTestButton = ({ onGenerate }) => {
                     margin={{ left: 'large' }}
                     onMouseEnter={() => setOpen(true)}
                     onMouseLeave={() => setOpen(false)}
-                    background="light-1" // Change this to your desired background color
+                    background="light-1"
                     pad="small"
                     round="small"
                     elevation="small"
@@ -65,24 +65,30 @@ const LabTestButton = ({ onGenerate }) => {
     );
 };
 
-const SidebarButtons = () => {
+const SidebarButtons = ({ setUser }) => {
     const [active, setActive] = useState();
+    const navigate = useNavigate(); // Initialize navigate for routing
 
-    const handleSidebarClick = (label) => {
+    const handleSidebarClick = async (label) => {
         setActive(label);
         switch (label) {
             case "Appointments":
-                window.location = "/ApptList";
+                navigate("/ApptList");
                 break;
             case "Settings":
-                window.location = "/DocSettings";
+                navigate("/DocSettings");
                 break;
             case "View Patients":
-                window.location = "/MedHistView";
+                navigate("/MedHistView");
                 break;
             case "Sign Out":
-                fetch("http://localhost:3001/endSession")
-                    .then(() => window.location = "/");
+                try {
+                    await fetch("http://localhost:3001/endSession", { method: "POST" });
+                    setUser(null); // Clear user state
+                    navigate("/"); // Redirect to the login page
+                } catch (error) {
+                    console.error("Error during sign out:", error);
+                }
                 break;
             default:
                 break;
@@ -101,7 +107,7 @@ const SidebarButtons = () => {
                             onClick={() => handleSidebarClick(label)}
                         />
                     ))}
-                    <LabTestButton onGenerate={() => window.location = "/Generatetestresult1"} />
+                    <LabTestButton onGenerate={() => navigate("/Generatetestresult1")} />
                     <SidebarButton
                         label="Sign Out"
                         active={"Sign Out" === active}
@@ -113,7 +119,7 @@ const SidebarButtons = () => {
     );
 };
 
-const DocHome = () => {
+const DocHome = ({ setUser }) => {
     const Header = () => (
         <Box
             tag='header'
@@ -133,7 +139,7 @@ const DocHome = () => {
     );
 
     return (
-        <Grommet full={true} theme={theme}>
+        <Grommet full theme={theme}>
             <Box align="left">
                 <Header />
                 <Grid
@@ -153,7 +159,7 @@ const DocHome = () => {
                             { type: 'slideRight', size: 'xlarge', duration: 150 }, 
                         ]}
                     >
-                        <SidebarButtons />
+                        <SidebarButtons setUser={setUser} />
                     </Box>
                     <Box
                         gridArea="main"

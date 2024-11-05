@@ -70,7 +70,7 @@ const SidebarButton = ({ label, onClick, dropdownItems }) => {
   );
 };
 
-const SidebarButtons = () => {
+const SidebarButtons = ({ setUser }) => {
   const [active, setActive] = useState("");
   const navigate = useNavigate();
 
@@ -79,40 +79,46 @@ const SidebarButtons = () => {
 
     switch (label) {
       case "Schedule Appointment":
-        navigate("/scheduleAppt");
+        navigate("/scheduleAppt", { replace: true });
         break;
       case "Sign Out":
-        localStorage.removeItem("userData");
-        await fetch("http://localhost:3001/endSession");
-        navigate("/");
+        try {
+          localStorage.removeItem("user");
+          await fetch("http://localhost:3001/endSession");
+        } catch (error) {
+          console.error("Error during sign out:", error);
+        } finally {
+          setUser(null); // Update user state on sign out
+          navigate("/", { replace: true }); // Navigate to login page
+        }
         break;
       case "View Appointments":
-        navigate("/PatientsViewAppt");
+        navigate("/PatientsViewAppt", { replace: true });
         break;
       case "View Medical History":
         try {
           const response = await fetch("http://localhost:3001/userInSession");
           const data = await response.json();
           const email_in_use = data.email;
-          navigate(`/ViewOneHistory/${encodeURIComponent(email_in_use)}`);
+          navigate(`/ViewOneHistory/${encodeURIComponent(email_in_use)}`, { replace: true });
         } catch (error) {
           console.error("Error fetching user session:", error);
         }
         break;
       case "Settings":
-        navigate("/Settings");
+        navigate("/Settings", { replace: true });
         break;
       case "View Lab Test Results":
-        navigate("/Viewlabresult");
+        navigate("/Viewlabresult", { replace: true });
         break;
       case "Add Insurance":
-        navigate("/addInsurance");
+        navigate("/addInsurance", { replace: true });
         break;
       case "View Insurance":
-        navigate("/ViewInsurance");
+        navigate("/ViewInsurance", { replace: true });
         break;
       case "View Bill": // New case for View Bill button
-        navigate("/ViewBill");
+        navigate("/ViewBill", { replace: true });
         break;
       default:
         break;
@@ -160,7 +166,7 @@ const SidebarButtons = () => {
   );
 };
 
-const Home = () => {
+const Home = ({ setUser }) => {
   const Header = () => (
     <Box
       tag="header"
@@ -202,7 +208,7 @@ const Home = () => {
               { type: "slideRight", size: "xlarge", duration: 150 },
             ]}
           >
-            <SidebarButtons />
+            <SidebarButtons setUser={setUser} />
           </Box>
           <Box gridArea="main" justify="top" align="center">
             <Box align="center" pad="large">
