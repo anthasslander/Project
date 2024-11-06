@@ -14,7 +14,8 @@ import {
   DropButton,
   MaskedInput,
   Keyboard,
-  Select
+  Select,
+  Spinner
 } from 'grommet';
 import './App.css';
 
@@ -49,21 +50,13 @@ const DropContent = ({ date: initialDate, time: initialTime, onClose }) => {
   const [time, setTime] = useState(initialTime);
 
   const close = () => {
-    // Split the time into hours and minutes
     let [hours, minutes] = time.split(":").map(Number);
-
-    // Create a Date object with the current date and selected time
     let startTime = new Date();
     startTime.setHours(hours, minutes, 0, 0);
-
-    // Add one hour to the start time
     let endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-
-    // Format end time as HH:mm
     let endHours = endTime.getHours().toString().padStart(2, '0');
     let endMinutes = endTime.getMinutes().toString().padStart(2, '0');
     let formattedEndTime = `${endHours}:${endMinutes}`;
-
     onClose(date || initialDate, time || initialTime, formattedEndTime);
   };
 
@@ -80,7 +73,7 @@ const DropContent = ({ date: initialDate, time: initialTime, onClose }) => {
         <Keyboard
           required
           onEnter={event => {
-            event.preventDefault(); // so drop doesn't re-open
+            event.preventDefault();
             close();
           }}
         >
@@ -236,53 +229,62 @@ const SchedulingAppt = () => {
   const [concerns, setConcerns] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [doctor, setDoctor] = useState("");
-  const [showViewBill, setShowViewBill] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = (event) => {
     event.preventDefault();
-  
-    // Retrieve email from local storage
+    setLoading(true);
+
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
       window.alert("User is not logged in!");
-      return;
-    }
-  
-    const user = JSON.parse(storedUser);
-    const currentUserEmail = user.email;
-  
-    // Check if email is available
-    if (!currentUserEmail) {
-      window.alert("No email found in local storage!");
+      setLoading(false);
       return;
     }
 
-    // Check if an appointment already exists
+    const user = JSON.parse(storedUser);
+    const currentUserEmail = user.email;
+
+    if (!currentUserEmail) {
+      window.alert("No email found in local storage!");
+      setLoading(false);
+      return;
+    }
+
     fetch(`http://localhost:3001/checkIfApptExists?email=${currentUserEmail}&startTime=${time}&date=${date}&docEmail=${doctor}`)
       .then(res => res.json())
       .then(res => {
-        if (res.data[0]) {
-          window.alert("Appointment Clash! Try another doctor or date/time");
-        } else {
-          // Generate a unique appointment ID
-          fetch("http://localhost:3001/genApptUID")
-            .then(res => res.json())
-            .then(res => {
-              const gen_uid = res.id;
-
-              // Schedule the appointment
-              fetch(`http://localhost:3001/schedule?time=${time}&endTime=${endTime}&date=${date}&concerns=${concerns}&symptoms=${symptoms}&id=${gen_uid}&doc=${doctor}`)
-                .then(() => {
-                  // Add the appointment to the patient's records
-                  fetch(`http://localhost:3001/addToPatientSeeAppt?email=${currentUserEmail}&id=${gen_uid}&concerns=${concerns}&symptoms=${symptoms}`)
-                    .then(() => {
-                      window.alert("Appointment successfully scheduled!");
-                    
-                    });
-                });
-            });
+        if (res.data.length > 0) {
+          window.alert(res.message || "Appointment Clash! Try another doctor or date/time");
+          setLoading(false);
+          return;
         }
+
+        fetch("http://localhost:3001/genApptUID")
+          .then(res => res.json())
+          .then(res => {
+            const gen_uid = res.id;
+
+            fetch(`http://localhost:3001/schedule?time=${time}&endTime=${endTime}&date=${date}&concerns=${concerns}&symptoms=${symptoms}&id=${gen_uid}&doc=${doctor}`)
+              .then(() => {
+                fetch(`http://localhost:3001/addToPatientSeeAppt?email=${currentUserEmail}&id=${gen_uid}&concerns=${concerns}&symptoms=${symptoms}`)
+                  .then(() => {
+                    window.alert("Appointment successfully scheduled!");
+                    setLoading(false);
+                  });
+              });
+          })
+          .catch(() => {
+            window.alert("Error while scheduling appointment.");
+            setLoading(false);
+          });
+      })
+      .catch(() => {
+        window.alert("Error checking for appointment conflicts.");
+        setLoading(false);
       });
   };
+
   return (
     <Grommet theme={theme} full>
       <AppBar>
@@ -306,11 +308,11 @@ const SchedulingAppt = () => {
           <br />
           <Box align="center" pad="small" gap="small">
             <Button
-              label="Attempt To Schedule"
+              label={loading ? <Spinner /> : "Attempt To Schedule"}
               type="submit"
               primary
+              disabled={loading}
             />
-            
           </Box>
         </Form>
       </Box>

@@ -260,16 +260,23 @@ app.get("/endSession", (req, res) => {
 
 // Checks If a similar appointment exists to avoid a clash
 app.get("/checkIfApptExists", (req, res) => {
-  let cond1,
-    cond2 = "";
+  let cond1, cond2;
   const params = req.query;
   const email = params.email;
   const doc_email = params.docEmail;
   const startTime = params.startTime;
   const date = params.date;
   const ndate = new Date(date).toLocaleDateString().substring(0, 10);
-  const sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`;
-  const sql_start = `CONVERT('${startTime}', TIME)`;
+  const sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`; // Correctly formatted SQL string
+  const sql_start = `CONVERT('${startTime}', TIME)`; // Correctly formatted SQL string
+  const sql_end = `CONVERT(ADDTIME('${startTime}', '01:00:00'), TIME)`; // Adding 1 hour to the start time
+
+  // Log the date, start time, and end time for debugging
+  console.log(`Date received: ${date}`);
+  console.log(`Formatted SQL date: ${ndate}`);
+  console.log(`Start time received: ${startTime}`);
+  console.log(`SQL start time: ${sql_start}`);
+  console.log(`SQL end time (1 hour later): ${sql_end}`);
 
   // Check if the patient already has an appointment at the same time
   let statement = `SELECT * FROM PatientsAttendAppointments, Appointment
@@ -283,21 +290,23 @@ app.get("/checkIfApptExists", (req, res) => {
     else {
       cond1 = results;
 
-      // Check if the doctor already has an appointment during that time
+      // Check if the doctor already has an appointment overlapping the start time
       statement = `SELECT * FROM Diagnose d INNER JOIN Appointment a
                    ON d.appt = a.id
                    WHERE doctor = "${doc_email}"
                    AND date = ${sql_date}
                    AND status = "NotDone"
-                   AND ${sql_start} >= starttime
-                   AND ${sql_start} < endtime`;
+                   AND (
+                     (${sql_start} >= starttime AND ${sql_start} < endtime) OR
+                     (${sql_end} > starttime AND ${sql_end} <= endtime)
+                   )`;
       console.log(statement);
       con.query(statement, (error, results) => {
         if (error) throw error;
         else {
           cond2 = results;
 
-          // Check if the appointment is within the doctor's working hours and outside break time
+          // Check if the appointment is within the doctor's working hours and avoids break time
           statement = `SELECT doctor, starttime, endtime, breaktime, day
                        FROM DocsHaveSchedules
                        INNER JOIN Schedule
@@ -305,22 +314,40 @@ app.get("/checkIfApptExists", (req, res) => {
                        WHERE doctor = "${doc_email}"
                        AND day = DAYNAME(${sql_date})
                        AND ${sql_start} >= starttime
-                       AND ${sql_start} < endtime
-                       AND (${sql_start} < breaktime OR ${sql_start} >= DATE_ADD(breaktime, INTERVAL 1 HOUR))`;
+                       AND ${sql_end} <= endtime
+                       AND (
+                         (${sql_start} < breaktime OR ${sql_end} <= breaktime) OR 
+                         (${sql_start} >= DATE_ADD(breaktime, INTERVAL 1 HOUR))
+                       )`;
           console.log(statement);
           con.query(statement, (error, results) => {
             if (error) throw error;
             else {
-              // If results are found, the time is valid
-              if (results.length === 0) {
+              // Log the start time, end time, and day obtained from the schedule
+              results.forEach(schedule => {
+                console.log(`Doctor's schedule - Start time: ${schedule.starttime}, End time: ${schedule.endtime}, Day: ${schedule.day}, Break time: ${schedule.breaktime}`);
+              });
+
+              // If no results are found, the time is unavailable due to conflicts
+              if (cond1.length > 0) {
                 res.json({
-                  data: cond1.concat(cond2, []),
-                  message: "Time is unavailable due to schedule conflicts",
+                  data: cond1,
+                  message: "Patient already has an appointment at this time.",
+                });
+              } else if (cond2.length > 0) {
+                res.json({
+                  data: cond2,
+                  message: "Doctor has an overlapping appointment at this time.",
+                });
+              } else if (results.length === 0) {
+                res.json({
+                  data: [],
+                  message: "Time is unavailable due to schedule conflicts or break time.",
                 });
               } else {
                 res.json({
-                  data: cond1.concat(cond2, [1]),
-                  message: "Appointment time is available",
+                  data: [1],
+                  message: "Appointment time is available.",
                 });
               }
             }
@@ -330,6 +357,7 @@ app.get("/checkIfApptExists", (req, res) => {
     }
   });
 });
+
 
 //Returns Date/Time of Appointment
 app.get("/getDateTimeOfAppt", (req, res) => {
@@ -510,7 +538,7 @@ app.get("/schedule", (req, res) => {
   });
 });
 
-// Generates ID for appointment
+// Generates ID for appointment,add +1 to the last appintment id to generate the app id for next appointment
 app.get("/genApptUID", (req, res) => {
   const statement = "SELECT id FROM Appointment ORDER BY id DESC LIMIT 1";
   con.query(statement, (error, results) => {
