@@ -267,16 +267,9 @@ app.get("/checkIfApptExists", (req, res) => {
   const startTime = params.startTime;
   const date = params.date;
   const ndate = new Date(date).toLocaleDateString().substring(0, 10);
-  const sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`; // Correctly formatted SQL string
-  const sql_start = `CONVERT('${startTime}', TIME)`; // Correctly formatted SQL string
+  const sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`;
+  const sql_start = `CONVERT('${startTime}', TIME)`;
   const sql_end = `CONVERT(ADDTIME('${startTime}', '01:00:00'), TIME)`; // Adding 1 hour to the start time
-
-  // Log the date, start time, and end time for debugging
-  console.log(`Date received: ${date}`);
-  console.log(`Formatted SQL date: ${ndate}`);
-  console.log(`Start time received: ${startTime}`);
-  console.log(`SQL start time: ${sql_start}`);
-  console.log(`SQL end time (1 hour later): ${sql_end}`);
 
   // Check if the patient already has an appointment at the same time
   let statement = `SELECT * FROM PatientsAttendAppointments, Appointment
@@ -323,11 +316,6 @@ app.get("/checkIfApptExists", (req, res) => {
           con.query(statement, (error, results) => {
             if (error) throw error;
             else {
-              // Log the start time, end time, and day obtained from the schedule
-              results.forEach(schedule => {
-                console.log(`Doctor's schedule - Start time: ${schedule.starttime}, End time: ${schedule.endtime}, Day: ${schedule.day}, Break time: ${schedule.breaktime}`);
-              });
-
               // If no results are found, the time is unavailable due to conflicts
               if (cond1.length > 0) {
                 res.json({
@@ -357,6 +345,7 @@ app.get("/checkIfApptExists", (req, res) => {
     }
   });
 });
+
 
 
 //Returns Date/Time of Appointment
